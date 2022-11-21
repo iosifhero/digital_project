@@ -1,31 +1,32 @@
-import gulp from 'gulp';
-import del from 'del';
-import postcss from 'postcss';
-import autoprefixer from 'autoprefixer';
-import include from 'gulp-format-html';
-import plumber from 'gulp-plumber';
-import  formatHtml from 'gulp-format-html';
-import less from 'gulp-less';
-import postcss from 'gulp-postcss';
-import autoprefixer from 'autoprefixer';
-import sortMediaQueries from 'postcss-sort-media-queries';
-import minify from 'gulp-csso';
-import rename from 'gulp-rename';
-import terser from 'gulp-terser';
-import imagemin from 'gulp-imagemin';
+import gulp from "gulp";
+import del from "del";
+import include from "gulp-file-include";
+import plumber from "gulp-plumber";
+import formatHtml from "gulp-format-html";
+import less from "gulp-less";
+import postcss from "gulp-postcss";
+import autoprefixer from "autoprefixer";
+import sortMediaQueries from "postcss-sort-media-queries";
+import minify from "gulp-csso";
+import rename from "gulp-rename";
+import terser from "gulp-terser";
+import imagemin from "gulp-imagemin";
 import imagemin_gifsicle from "imagemin-gifsicle";
-import imagemin_mozjpeg from 'imagemin-mozjpeg';
-import imagemin_optipng from 'imagemin-optipng';
+import imagemin_mozjpeg from "imagemin-mozjpeg";
+import imagemin_optipng from "imagemin-optipng";
 import svgmin from "gulp-svgmin";
-import svgstore from 'gulp-svgstore';
+import svgstore from "gulp-svgstore";
+
+import server from "browser-sync";
 
 
 
 
 const resources = {
-    html: 'src/html/**/*.html',
-    less: 'src/styles/**/*.less',
-    jsVendor:  'src/scripts/vendor/**/*.js'
+    html: "src/html/**/*.html",
+    less: "src/styles/**/*.less",
+    jsDev: "src/scripts/dev/**.*.js",
+    jsVendor:  "src/scripts/vendor/**/*.js",
     static: [
         "src/assets/icons/**/*.*",
         "src/assets/favicons/**/*.*",
@@ -35,81 +36,81 @@ const resources = {
         "src/json/**/*.json",
         "src/php/**/*.php"
       ],
-    images: 'stc/assets/images/**/*.{png, jpg, jpeg, webp, gif, svg}',
-    svgSprite: 'src/assets/svg-sprite/*.svg'
+    images: "stc/assets/images/**/*.{png, jpg, jpeg, webp, gif, svg}",
+    svgSprite: "src/assets/svg-sprite/*.svg"
 }
 
 function clean () {
-    return del ('dist');
+    return del ("dist");
 }
 
 function includeHtml() {
-    return gulp.src('src/html/*.html')
+    return gulp.src("src/html/*.html")
     .pipe(plumber())
     .pipe(
         include({
-            prefix:"@@" ?
+            prefix:"@@",
             basepath: "@file"
         })
     )
     .pipe(formatHtml())
-    .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest("dist"));
 }
 
 function style() {
     return  gulp
-        .src('src/styles/styles.less')
+        .src("src/styles/styles.less")
         .pipe(plumber())
         .pipe(less())
         .pipe(
             postcss(
                 [
-                    autoprefixer({overrideBrowserslist: ['last 4 version']}),
+                    autoprefixer({overrideBrowserslist: ["last 4 version"]}),
                     sortMediaQueries({
-                        sort: 'desktop-first'
+                        sort: "desktop-first"
                     })
                 ]
             )
         )
-            .pipe(gulp.dest('dist/styles'))
+            .pipe(gulp.dest("dist/styles"))
             .pipe(minify())
-            .pipe(rename('styles.min.css'))
-            .pipe(gulp.dest('dist/styles'))
+            .pipe(rename("styles.min.css"))
+            .pipe(gulp.dest("dist/styles"))
 }
 
 function js() {
     return gulp
-    .src('stc/scripts/dev/*.js')
+    .src("stc/scripts/dev/*.js")
     .pipe(plumber())
     .pipe(
         include({
-            prefix: '//@@',
-            basepath:  '@file'
+            prefix: "//@@",
+            basepath:  "@file"
         })
     )
-    .pipe(gulp.dest('dist/scripts'))
+    .pipe(gulp.dest("dist/scripts"))
     .pipe(terser())
     .pipe(
         rename(function (path) {
-            path.basename += '.min';
+            path.basename += ".min";
         })
     )
-    .pipe(gulp.dest('dist/scripts'));
+    .pipe(gulp.dest("dist/scripts"));
 }
 
 function jsCopy() {
     return gulp 
         .src(resources.jsVendor)
         .pipe(plumber())
-        .pipe(gulp.dest('dist/scripts'))
+        .pipe(gulp.dest("dist/scripts"))
 }
 
 function copy() {
     return gulp
     .src(resources.static,{
-        base: 'src'
+        base: "src"
     })
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest("dist/"))
 }
 
 function images() {
@@ -127,12 +128,12 @@ function images() {
             })
         ])
     )
-    .pipe(gulp.dest('dist/assets.images'))
+    .pipe(gulp.dest("dist/assets.images"))
 }
 
 function  svgSprite() {
     return gulp
-    .src(resources.svgSprite()
+    .src(resources.svgSprite)
         .pipe(
             svgmin({
                 js2svg: {
@@ -145,9 +146,8 @@ function  svgSprite() {
                 inlineSvg: true
             })
         )
-        .pipe(rename('symbols.svg'))
+        .pipe(rename("symbols.svg"))
         .pipe(gulp.dest("dist/assets/icon"))
-    )
 }
 
 const build = gulp.series(
@@ -160,3 +160,41 @@ const build = gulp.series(
     images,
     svgSprite
 );
+
+function reloadServer(done) {
+    server.reload();
+    done();
+}
+
+function serve() {
+    server.init(
+        {
+            server: "dist"
+        }
+    );
+    gulp.watch(resources.html, gulp.series(includeHtml, reloadServer));
+    gulp.watch(resources.less, gulp.series(style, reloadServer));
+    gulp.watch(resources.jsDev, gulp.series(js, reloadServer));
+    gulp.watch(resources.jsVendor, gulp.series(jsCopy, reloadServer));
+    gulp.watch(resources.static, { delay: 500 }, gulp.series(copy, reloadServer));
+    gulp.watch(resources.images, {
+        delay: 500
+    }, gulp.series(images, reloadServer));
+    gulp.watch(resources.svgSprite,  gulp.series(svgSprite,  reloadServer));
+}
+
+const start = gulp.series(build, serve);
+
+export{
+    clean,
+    copy,
+    includeHtml,
+    style,
+    js,
+    jsCopy,
+    images,
+    svgSprite,
+    build,
+    serve,
+    start
+};
