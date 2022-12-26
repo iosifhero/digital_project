@@ -100,7 +100,7 @@ function js() {
 }
 
 function jsCopy() {
-    return gulp 
+    return gulp
         .src(resources.jsVendor)
         .pipe(plumber())
         .pipe(gulp.dest("dist/scripts"))

@@ -16,7 +16,8 @@ body {
           flex-direction: column;
   min-height: 100vh;
   padding-top: 147px;
-  background-image: url(../../assets/images/noise.png);
+  background-color: #DEDEDE;
+  background-image: url(../assets/images/noise.png);
   background-position: 0 0, 0 0;
   background-size: auto, 100% auto;
   background-repeat: repeat, repeat-y;
@@ -25,6 +26,7 @@ body {
   font-weight: 400;
   font-style: 16px;
   line-height: 1.3;
+  overflow-x: hidden;
 }
 .main {
   -webkit-box-flex: 1;
@@ -35,6 +37,11 @@ body {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
+}
+.a {
+  color: #1F1E1E;
+  outline: none;
+  text-decoration: none;
 }
 @font-face {
   font-family: 'mak';
@@ -76,7 +83,7 @@ body {
 .btn:hover,
 .btn:active {
   color: white;
-  background-color: #1f1e1e;
+  background-color: #1F1E1E;
 }
 .events-card {
   display: -webkit-box;
@@ -170,11 +177,13 @@ body {
   z-index: 1;
 }
 @supports ((-webkit-backdrop-filter: blur(20px)) or (backdrop-filter: blur(20px))) {
-  -webkit-backdrop-filter: blur(20px);
-          backdrop-filter: blur(20px);
-  background: rgba(222, 222, 222, 0.5);
+  .page-header {
+    -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+    background: rgba(222, 222, 222, 0.5);
+  }
 }
-__container {
+.page-header__container {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   display: -webkit-box;
@@ -190,7 +199,7 @@ __container {
   /*отступ слева 40*/
   padding-right: 40px;
 }
-__right-block {
+.page-header__right-block {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -199,7 +208,7 @@ __right-block {
           justify-content: flex-end;
   width: 202px;
 }
-__logo {
+.page-header__logo {
   -ms-flex-negative: 0;
       flex-shrink: 0;
   width: 202px;
@@ -207,11 +216,11 @@ __logo {
   text-decoration: none;
   font-size: 0;
 }
-__logo-icon {
+.page-header__logo-icon {
   width: 100%;
   height: 100%;
 }
-__nav {
+.page-header__nav {
   margin: 0 auto;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -220,7 +229,7 @@ __nav {
       -ms-flex-align: baseline;
           align-items: baseline;
 }
-__nav-link {
+.page-header__nav-link {
   font-weight: 600px;
   text-decoration: none;
   font-size: 18px;
@@ -231,9 +240,15 @@ __nav-link {
   -o-transition: color 0.2s;
   transition: color 0.2s;
 }
-__nav-link:hover {
+.page-header__nav-link:hover {
   color: #bc3324;
 }
-__nav-link:active {
+.page-header__nav-link:active {
   color: #bc3324;
+}
+.page-header__nav-link--red {
+  color: #bc3324;
+}
+.overflow-pp {
+  overflow: hidden;
 }
